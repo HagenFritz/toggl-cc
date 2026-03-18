@@ -50,12 +50,18 @@ switch (command) {
     await runSyncProjects()
     break
   }
+  case 'update-token': {
+    const { runUpdateToken } = await import('./commands/update-token.js')
+    await runUpdateToken()
+    break
+  }
   default: {
     console.log(`toggl-cc — Toggl Track for Claude Code
 
 Usage:
   npx toggl-cc@latest install          Set up credentials and hooks
   npx toggl-cc@latest uninstall        Remove hooks and skills
+  npx toggl-cc@latest update-token     Update your Toggl API token
   npx toggl-cc@latest start [issue]    Start a timer
   npx toggl-cc@latest stop             Stop the current timer
   npx toggl-cc@latest status           Show timer and branch alignment

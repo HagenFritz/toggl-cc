@@ -2,7 +2,7 @@ import { intro, outro, text, select, confirm, spinner, log } from '@clack/prompt
 import { fileURLToPath } from 'url'
 import path from 'path'
 import { getMe, getWorkspaces } from '../api/toggl.js'
-import { saveConfig } from '../config.js'
+import { loadConfig, saveConfig } from '../config.js'
 import { patchSettings, copySkills } from '../claude.js'
 
 function packageRoot(): string {
@@ -23,56 +23,77 @@ export async function runInstall(): Promise<void> {
     process.exit(1)
   }
 
-  // Get API token
+  // Check for existing config
+  const existing = loadConfig()
   let apiToken = ''
   let workspaceId = 0
 
-  while (true) {
-    const token = await text({
-      message: 'Enter your Toggl API Token (found at toggl.com/profile):',
-      placeholder: 'your-api-token',
-      validate: (v) => (v.trim().length === 0 ? 'API token is required' : undefined),
+  if (existing && existing.apiToken && existing.workspaceId) {
+    log.info(
+      `Found existing config: workspace ${existing.workspaceId}, ${existing.reminderEveryNPrompts}s reminder interval`,
+    )
+    const shouldUpdate = await confirm({
+      message: 'Update API credentials?',
+      initialValue: false,
     })
 
-    if (typeof token !== 'string' || token.length === 0) {
-      log.error('Setup cancelled.')
-      process.exit(0)
-    }
-
-    const s = spinner()
-    s.start('Validating token...')
-
-    try {
-      await getMe(token.trim())
-      s.stop('Token valid ✓')
-      apiToken = token.trim()
-      break
-    } catch {
-      s.stop('Invalid token — please try again')
+    if (shouldUpdate === false || typeof shouldUpdate === 'symbol') {
+      apiToken = existing.apiToken
+      workspaceId = existing.workspaceId
+    } else {
+      // User wants to update — fall through to token prompt
     }
   }
 
-  // Detect workspaces
-  const s2 = spinner()
-  s2.start('Fetching workspaces...')
-  const workspaces = await getWorkspaces(apiToken)
-  s2.stop(`Found ${workspaces.length} workspace(s)`)
+  // Get API token (if not skipping)
+  if (!apiToken) {
+    while (true) {
+      const token = await text({
+        message: 'Enter your Toggl API Token (found at toggl.com/profile):',
+        placeholder: 'your-api-token',
+        validate: (v) => (v.trim().length === 0 ? 'API token is required' : undefined),
+      })
 
-  if (workspaces.length === 1) {
-    workspaceId = workspaces[0].id
-    log.info(`Using workspace: ${workspaces[0].name}`)
-  } else {
-    const picked = await select({
-      message: 'Select a workspace:',
-      options: workspaces.map((w) => ({ value: w.id, label: w.name })),
-    })
+      if (typeof token !== 'string' || token.length === 0) {
+        log.error('Setup cancelled.')
+        process.exit(0)
+      }
 
-    if (typeof picked === 'symbol') {
-      log.error('Setup cancelled.')
-      process.exit(0)
+      const s = spinner()
+      s.start('Validating token...')
+
+      try {
+        await getMe(token.trim())
+        s.stop('Token valid ✓')
+        apiToken = token.trim()
+        break
+      } catch {
+        s.stop('Invalid token — please try again')
+      }
     }
 
-    workspaceId = picked as number
+    // Detect workspaces
+    const s2 = spinner()
+    s2.start('Fetching workspaces...')
+    const workspaces = await getWorkspaces(apiToken)
+    s2.stop(`Found ${workspaces.length} workspace(s)`)
+
+    if (workspaces.length === 1) {
+      workspaceId = workspaces[0].id
+      log.info(`Using workspace: ${workspaces[0].name}`)
+    } else {
+      const picked = await select({
+        message: 'Select a workspace:',
+        options: workspaces.map((w) => ({ value: w.id, label: w.name })),
+      })
+
+      if (typeof picked === 'symbol') {
+        log.error('Setup cancelled.')
+        process.exit(0)
+      }
+
+      workspaceId = picked as number
+    }
   }
 
   // Save credentials
@@ -82,7 +103,12 @@ export async function runInstall(): Promise<void> {
   })
 
   if (shouldSave !== false && typeof shouldSave !== 'symbol') {
-    saveConfig({ apiToken, workspaceId, reminderEveryNPrompts: 5 })
+    saveConfig({
+      apiToken,
+      workspaceId,
+      reminderEveryNPrompts: existing?.reminderEveryNPrompts ?? 5,
+      projects: existing?.projects,
+    })
     log.success('Credentials saved to ~/.toggl-cc/config.json')
   } else {
     log.info(
