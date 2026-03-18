@@ -1,0 +1,38 @@
+{
+  "name": "toggl-cc",
+  "version": "1.0.0",
+  "description": "Toggl Track integration for Claude Code — start timers, track issues, stay focused",
+  "type": "module",
+  "bin": {
+    "toggl-cc": "./dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "skills/"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsdown --watch",
+    "prepublishOnly": "npm run build && npm run typecheck"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "toggl",
+    "time-tracking",
+    "productivity",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.9.0",
+    "@types/node": "^25.5.0",
+    "tsdown": "latest",
+    "typescript": "^5.0.0"
+  }
+}
