@@ -24,6 +24,13 @@ export interface TogglTimeEntry {
   workspace_id: number
 }
 
+export class TogglRateLimitError extends Error {
+  constructor() {
+    super('Toggl API rate limit exceeded')
+    this.name = 'TogglRateLimitError'
+  }
+}
+
 async function request<T>(
   method: string,
   path: string,
@@ -38,6 +45,10 @@ async function request<T>(
     },
     body: body ? JSON.stringify(body) : undefined,
   })
+
+  if (res.status === 429) {
+    throw new TogglRateLimitError()
+  }
 
   if (!res.ok) {
     throw new Error(`Toggl API ${method} ${path} failed: ${res.status} ${res.statusText}`)

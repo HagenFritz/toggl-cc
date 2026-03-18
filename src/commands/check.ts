@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 import { loadConfig, type Config } from '../config.js'
-import { getCurrentTimer } from '../api/toggl.js'
+import { getCurrentTimer, TogglRateLimitError } from '../api/toggl.js'
 import { loadCache, isCacheWarm, saveCache } from '../cache.js'
 import { incrementPromptCount, isPaused } from '../state.js'
 import { formatDuration } from '../utils.js'
@@ -90,7 +90,10 @@ export async function runCheck(): Promise<void> {
         } else {
           saveCache(null)
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof TogglRateLimitError) {
+          console.log('⚠️  Toggl rate limit reached — skipping timer check. Carry on!')
+        }
         process.exit(0)
       }
     }
