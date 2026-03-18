@@ -55,6 +55,16 @@ export async function getWorkspaces(apiToken: string): Promise<TogglWorkspace[]>
   return request<TogglWorkspace[]>('GET', '/workspaces', apiToken)
 }
 
+export interface TogglProject {
+  id: number
+  name: string
+  active: boolean
+}
+
+export async function getProjects(apiToken: string, workspaceId: number): Promise<TogglProject[]> {
+  return request<TogglProject[]>('GET', `/workspaces/${workspaceId}/projects`, apiToken)
+}
+
 export async function getCurrentTimer(apiToken: string): Promise<TogglTimeEntry | null> {
   return request<TogglTimeEntry | null>('GET', '/me/time_entries/current', apiToken)
 }
@@ -63,10 +73,12 @@ export async function startTimer(
   apiToken: string,
   workspaceId: number,
   description: string,
+  projectId?: number,
 ): Promise<TogglTimeEntry> {
   return request<TogglTimeEntry>('POST', `/workspaces/${workspaceId}/time_entries`, apiToken, {
     description,
     workspace_id: workspaceId,
+    project_id: projectId ?? null,
     start: new Date().toISOString(),
     duration: -1,
     created_with: 'toggl-cc',

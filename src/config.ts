@@ -2,10 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
+export interface TogglProject {
+  id: number
+  name: string
+}
+
 export interface Config {
   apiToken: string
   workspaceId: number
   reminderEveryNPrompts: number
+  projects?: TogglProject[]
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.toggl-cc')
@@ -39,6 +45,7 @@ export function loadConfig(): Config | null {
       apiToken: envToken ?? parsed.apiToken ?? '',
       workspaceId: envWorkspace ? parseInt(envWorkspace, 10) : (parsed.workspaceId ?? 0),
       reminderEveryNPrompts: parsed.reminderEveryNPrompts ?? 5,
+      projects: parsed.projects,
     }
   } catch {
     return null

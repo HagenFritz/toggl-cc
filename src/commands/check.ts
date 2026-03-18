@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 import { loadConfig, type Config } from '../config.js'
 import { getCurrentTimer } from '../api/toggl.js'
 import { loadCache, isCacheWarm, saveCache } from '../cache.js'
-import { incrementPromptCount } from '../state.js'
+import { incrementPromptCount, isPaused } from '../state.js'
 import { formatDuration } from '../utils.js'
 
 function getCurrentBranch(): string | null {
@@ -63,6 +63,11 @@ export async function runCheck(): Promise<void> {
       process.exit(0)
     }
     const cfg = config as Config
+
+    // Bail silently if user has paused toggl checks for this session
+    if (isPaused()) {
+      process.exit(0)
+    }
 
     const promptCount = incrementPromptCount()
 

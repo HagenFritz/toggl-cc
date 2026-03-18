@@ -116,9 +116,14 @@ export async function runInstall(): Promise<void> {
 ✅ toggl-cc installed!
 
 Skills added to Claude Code:
-  /toggl-start [issue]  — start a Toggl timer
-  /toggl-stop           — stop the current timer
-  /toggl-status         — check timer/branch alignment
+  /toggl-start [issue]   — start a Toggl timer
+  /toggl-stop            — stop the current timer
+  /toggl-status          — check timer/branch alignment
+  /toggl-pause           — pause hook checks for this session
+  /toggl-resume          — resume hook checks
+  /toggl-sync-projects   — cache your Toggl projects locally
+
+Tip: run /toggl-sync-projects once to enable project selection when starting timers.
 
 The hook will automatically check your timer on each prompt.
 Restart Claude Code for hooks to take effect.`)

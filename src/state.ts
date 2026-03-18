@@ -11,6 +11,7 @@ export interface RunningTimer {
 export interface State {
   runningTimer: RunningTimer | null
   promptCount: number
+  paused: boolean
 }
 
 const STATE_FILE = path.join(os.homedir(), '.toggl-cc', 'state.json')
@@ -20,7 +21,7 @@ export function loadState(): State {
     const raw = fs.readFileSync(STATE_FILE, 'utf-8')
     return JSON.parse(raw) as State
   } catch {
-    return { runningTimer: null, promptCount: 0 }
+    return { runningTimer: null, promptCount: 0, paused: false }
   }
 }
 
@@ -46,4 +47,14 @@ export function incrementPromptCount(): number {
   state.promptCount = (state.promptCount ?? 0) + 1
   saveState(state)
   return state.promptCount
+}
+
+export function setPaused(paused: boolean): void {
+  const state = loadState()
+  state.paused = paused
+  saveState(state)
+}
+
+export function isPaused(): boolean {
+  return loadState().paused ?? false
 }

@@ -35,6 +35,21 @@ switch (command) {
     await runCheck()
     break
   }
+  case 'pause': {
+    const { runPause } = await import('./commands/pause.js')
+    runPause()
+    break
+  }
+  case 'resume': {
+    const { runResume } = await import('./commands/resume.js')
+    runResume()
+    break
+  }
+  case 'sync-projects': {
+    const { runSyncProjects } = await import('./commands/sync-projects.js')
+    await runSyncProjects()
+    break
+  }
   default: {
     console.log(`toggl-cc — Toggl Track for Claude Code
 
@@ -44,6 +59,9 @@ Usage:
   npx toggl-cc@latest start [issue]    Start a timer
   npx toggl-cc@latest stop             Stop the current timer
   npx toggl-cc@latest status           Show timer and branch alignment
+  npx toggl-cc@latest pause            Pause hook checks for this session
+  npx toggl-cc@latest resume           Resume hook checks
+  npx toggl-cc@latest sync-projects    Fetch and cache your Toggl projects
   npx toggl-cc@latest check            (used by hook — runs on every prompt)
 `)
     process.exit(command ? 1 : 0)
