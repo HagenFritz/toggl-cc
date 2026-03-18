@@ -66,13 +66,9 @@ export async function runStatus(): Promise<void> {
   }
 
   const elapsed = timerStart ? formatDuration(new Date(timerStart)) : '?'
-  const mismatch = branch ? detectMismatch(timerDescription, branch) : false
+  const result = branch ? detectMismatch(timerDescription, branch) : null
 
-  if (!mismatch) {
-    console.log(
-      `✅  Timer running: ${timerDescription} (${elapsed}) — ${branch ? 'branch matches' : 'no git repo'}`,
-    )
-  } else {
+  if (result === 'mismatch') {
     console.log(`\
 ⚠️  Heads up — timer mismatch detected!
 
@@ -82,5 +78,11 @@ export async function runStatus(): Promise<void> {
 Looks like you may have switched tasks. Options:
   • /toggl-stop then /toggl-start to track this branch instead
   • Keep going — this message won't block you`)
+  } else if (result === 'match') {
+    console.log(`✅  Timer running: ${timerDescription} (${elapsed}) — branch matches`)
+  } else if (result === 'unknown') {
+    console.log(`⏱  Timer running: ${timerDescription} (${elapsed}) — could not verify branch match`)
+  } else {
+    console.log(`⏱  Timer running: ${timerDescription} (${elapsed}) — no git repo`)
   }
 }

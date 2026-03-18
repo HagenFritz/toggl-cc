@@ -41,19 +41,22 @@ function hasWordOverlap(timerDesc: string, branch: string): boolean {
   return words.some((w) => branchLower.includes(w))
 }
 
-export function detectMismatch(timerDescription: string, branch: string): boolean {
+export type MatchResult = 'match' | 'mismatch' | 'unknown'
+
+export function detectMismatch(timerDescription: string, branch: string): MatchResult {
   const timerIssue = extractIssueNumber(timerDescription)
   const branchIssue = extractIssueFromBranch(branch)
 
   if (timerIssue && branchIssue) {
-    return timerIssue !== branchIssue
+    return timerIssue === branchIssue ? 'match' : 'mismatch'
   }
 
   if (timerIssue || branchIssue) {
-    return !hasWordOverlap(timerDescription, branch)
+    return hasWordOverlap(timerDescription, branch) ? 'match' : 'mismatch'
   }
 
-  return false
+  // Neither has an issue number and no word overlap check is possible
+  return 'unknown'
 }
 
 export async function runCheck(): Promise<void> {
@@ -110,8 +113,8 @@ export async function runCheck(): Promise<void> {
       process.exit(0)
     }
 
-    const mismatch = detectMismatch(timerDescription, branch)
-    if (!mismatch) {
+    const result = detectMismatch(timerDescription, branch)
+    if (result !== 'mismatch') {
       process.exit(0)
     }
 
