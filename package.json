@@ -4,7 +4,7 @@
   "description": "Toggl Track integration for Claude Code — start timers, track issues, stay focused",
   "type": "module",
   "bin": {
-    "toggl-cc": "./dist/cli.mjs"
+    "toggl-cc": "dist/cli.mjs"
   },
   "files": [
     "dist/",
