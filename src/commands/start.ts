@@ -120,9 +120,9 @@ async function pickProjectInteractive(cfg: Config): Promise<number | undefined> 
 
   let toShow: TogglProject[]
   if (filterInput) {
-    toShow = projects.filter((p) => p.name.toLowerCase().includes(filterInput.toLowerCase()))
+    toShow = projects.filter((p) => p.name.toLowerCase().includes(filterInput.toLowerCase())) as TogglProject[]
   } else {
-    toShow = [...recentProjects, ...otherProjects]
+    toShow = [...recentProjects, ...otherProjects] as TogglProject[]
   }
 
   if (toShow.length === 0) {
