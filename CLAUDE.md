@@ -22,15 +22,21 @@
 5. **String/symbol checks:** When using `@clack/prompts`, check for symbol returns (cancel signal): `typeof answer !== 'symbol'`
 
 ## Publishing Process
-1. Update version in `package.json` (semver: major.minor.patch)
-2. Commit the change: `git commit -m "Bump version to X.Y.Z"`
-3. Push to main: `git push origin main`
-4. GitHub Actions workflow runs automatically:
+1. **Prerequisite:** GitHub secret `NPM_TOKEN` must be set
+   - Go to repo Settings → Secrets and variables → Actions
+   - Create a secret named `NPM_TOKEN` with your npm automation token
+   - Get token from https://npmjs.com/settings/tokens (type: Automation)
+2. Update version in `package.json` (semver: major.minor.patch)
+3. Commit the change: `git commit -m "Bump version to X.Y.Z"`
+4. Push to main: `git push origin main`
+5. GitHub Actions workflow runs automatically:
    - Checks if version already exists on npm (exits silently if it does)
    - Runs `npm ci`, `npm run build`, `npm run typecheck`
-   - Publishes to npm with `NPM_TOKEN` secret
+   - Publishes to npm using `NPM_TOKEN` secret
    - Creates git tag `vX.Y.Z` and pushes it
-5. Watch GitHub Actions tab for success/failure
+6. Watch GitHub Actions tab for success/failure
+   - Look at https://github.com/HagenFritz/toggl-cc/actions
+   - Click latest "Publish to npm" workflow run
 
 ## When to Create a New Command
 1. Create `src/commands/xxx.ts` with `export async function runXxx(): Promise<void>`
