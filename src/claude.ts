@@ -112,7 +112,7 @@ export function copySkills(packageRoot: string): string[] {
 }
 
 export function removeSkills(): string[] {
-  const skillNames = ['toggl-start', 'toggl-stop', 'toggl-status', 'toggl-pause', 'toggl-resume', 'toggl-sync-projects']
+  const skillNames = ['toggl-start', 'toggl-stop', 'toggl-set-end', 'toggl-status', 'toggl-pause', 'toggl-resume', 'toggl-sync-projects']
   const removed: string[] = []
 
   for (const name of skillNames) {

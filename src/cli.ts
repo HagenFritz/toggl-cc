@@ -25,6 +25,11 @@ switch (command) {
     await runStop()
     break
   }
+  case 'set-end': {
+    const { runSetEnd } = await import('./commands/set-end.js')
+    await runSetEnd()
+    break
+  }
   case 'status': {
     const { runStatus } = await import('./commands/status.js')
     await runStatus()
@@ -64,6 +69,7 @@ Usage:
   npx toggl-cc@latest update-token     Update your Toggl API token
   npx toggl-cc@latest start [issue]    Start a timer
   npx toggl-cc@latest stop             Stop the current timer
+  npx toggl-cc@latest set-end          Set a custom end time for the current timer
   npx toggl-cc@latest status           Show timer and branch alignment
   npx toggl-cc@latest pause            Pause hook checks for this session
   npx toggl-cc@latest resume           Resume hook checks
