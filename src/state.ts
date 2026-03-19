@@ -13,6 +13,7 @@ export interface State {
   promptCount: number
   paused: boolean
   lastAutoCheckAt?: number
+  recentProjectIds?: number[]
 }
 
 const STATE_FILE = path.join(os.homedir(), '.toggl-cc', 'state.json')
@@ -22,7 +23,7 @@ export function loadState(): State {
     const raw = fs.readFileSync(STATE_FILE, 'utf-8')
     return JSON.parse(raw) as State
   } catch {
-    return { runningTimer: null, promptCount: 0, paused: false }
+    return { runningTimer: null, promptCount: 0, paused: false, recentProjectIds: [] }
   }
 }
 
@@ -68,4 +69,18 @@ export function setLastAutoCheckTime(): void {
 
 export function getLastAutoCheckTime(): number | null {
   return loadState().lastAutoCheckAt ?? null
+}
+
+export function addRecentProject(projectId: number): void {
+  const state = loadState()
+  const current = state.recentProjectIds ?? []
+  // Remove if already present (dedupe)
+  const filtered = current.filter((id) => id !== projectId)
+  // Prepend and trim to 3
+  state.recentProjectIds = [projectId, ...filtered].slice(0, 3)
+  saveState(state)
+}
+
+export function getRecentProjectIds(): number[] {
+  return loadState().recentProjectIds ?? []
 }
