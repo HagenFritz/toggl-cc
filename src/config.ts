@@ -12,6 +12,8 @@ export interface Config {
   workspaceId: number
   reminderEveryNPrompts: number
   roundingInterval?: number
+  enableAutoCheck?: boolean
+  autoCheckCadenceSeconds?: number
   projects?: TogglProject[]
 }
 
@@ -33,6 +35,8 @@ export function loadConfig(): Config | null {
       workspaceId: parseInt(envWorkspace, 10),
       reminderEveryNPrompts: 5,
       roundingInterval: 5,
+      enableAutoCheck: false,
+      autoCheckCadenceSeconds: 300,
     }
   }
 
@@ -48,6 +52,8 @@ export function loadConfig(): Config | null {
       workspaceId: envWorkspace ? parseInt(envWorkspace, 10) : (parsed.workspaceId ?? 0),
       reminderEveryNPrompts: parsed.reminderEveryNPrompts ?? 5,
       roundingInterval: parsed.roundingInterval ?? 5,
+      enableAutoCheck: parsed.enableAutoCheck ?? false,
+      autoCheckCadenceSeconds: parsed.autoCheckCadenceSeconds ?? 300,
       projects: parsed.projects,
     }
   } catch {

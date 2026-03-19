@@ -12,6 +12,7 @@ export interface State {
   runningTimer: RunningTimer | null
   promptCount: number
   paused: boolean
+  lastAutoCheckAt?: number
 }
 
 const STATE_FILE = path.join(os.homedir(), '.toggl-cc', 'state.json')
@@ -57,4 +58,14 @@ export function setPaused(paused: boolean): void {
 
 export function isPaused(): boolean {
   return loadState().paused ?? false
+}
+
+export function setLastAutoCheckTime(): void {
+  const state = loadState()
+  state.lastAutoCheckAt = Date.now()
+  saveState(state)
+}
+
+export function getLastAutoCheckTime(): number | null {
+  return loadState().lastAutoCheckAt ?? null
 }

@@ -111,6 +111,36 @@ export async function runInstall(): Promise<void> {
     roundingInterval = roundingChoice as number
   }
 
+  // Ask for auto-check preference
+  let enableAutoCheck = existing?.enableAutoCheck ?? false
+  const shouldEnableAutoCheck = await confirm({
+    message: 'Enable automatic timer checks (detects when you switch tasks)?',
+    initialValue: enableAutoCheck,
+  })
+
+  if (shouldEnableAutoCheck !== false && typeof shouldEnableAutoCheck !== 'symbol') {
+    enableAutoCheck = true
+
+    const cadenceInput = await text({
+      message: 'Check interval in seconds (default 300 = 5 minutes):',
+      placeholder: '300',
+      initialValue: String(existing?.autoCheckCadenceSeconds ?? 300),
+      validate: (v) => {
+        const num = parseInt(v, 10)
+        return isNaN(num) || num < 10 ? 'Must be at least 10 seconds' : undefined
+      },
+    })
+
+    if (typeof cadenceInput === 'string' && cadenceInput.length > 0) {
+      const cadence = parseInt(cadenceInput, 10)
+      if (!isNaN(cadence)) {
+        log.info(`Auto-check enabled: every ${cadence} seconds`)
+      }
+    }
+  } else {
+    enableAutoCheck = false
+  }
+
   // Save credentials
   const shouldSave = await confirm({
     message: 'Save credentials to ~/.toggl-cc/config.json?',
@@ -123,6 +153,8 @@ export async function runInstall(): Promise<void> {
       workspaceId,
       reminderEveryNPrompts: existing?.reminderEveryNPrompts ?? 5,
       roundingInterval,
+      enableAutoCheck,
+      autoCheckCadenceSeconds: enableAutoCheck ? parseInt(cadenceInput as string, 10) : 300,
       projects: existing?.projects,
     })
     log.success('Credentials saved to ~/.toggl-cc/config.json')

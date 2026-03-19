@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 import { loadConfig, type Config } from '../config.js'
 import { getCurrentTimer, TogglRateLimitError } from '../api/toggl.js'
 import { loadCache, isCacheWarm, saveCache } from '../cache.js'
-import { incrementPromptCount, isPaused } from '../state.js'
+import { incrementPromptCount, isPaused, setLastAutoCheckTime, getLastAutoCheckTime } from '../state.js'
 import { formatDuration } from '../utils.js'
 
 function getCurrentBranch(): string | null {
@@ -72,6 +72,19 @@ export async function runCheck(): Promise<void> {
       process.exit(0)
     }
 
+    // Check if auto-check is enabled
+    if (!cfg.enableAutoCheck) {
+      process.exit(0)
+    }
+
+    // Check if enough time has passed since last auto-check
+    const lastCheckTime = getLastAutoCheckTime()
+    const cadenceSeconds = cfg.autoCheckCadenceSeconds ?? 300
+    if (lastCheckTime && Date.now() - lastCheckTime < cadenceSeconds * 1000) {
+      process.exit(0)
+    }
+
+    setLastAutoCheckTime()
     const promptCount = incrementPromptCount()
 
     let timerDescription: string | null = null
