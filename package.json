@@ -1,6 +1,6 @@
 {
   "name": "toggl-cc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Toggl Track integration for Claude Code — start timers, track issues, stay focused",
   "type": "module",
   "bin": {
