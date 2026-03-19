@@ -11,6 +11,7 @@ export interface Config {
   apiToken: string
   workspaceId: number
   reminderEveryNPrompts: number
+  roundingInterval?: number
   projects?: TogglProject[]
 }
 
@@ -31,6 +32,7 @@ export function loadConfig(): Config | null {
       apiToken: envToken,
       workspaceId: parseInt(envWorkspace, 10),
       reminderEveryNPrompts: 5,
+      roundingInterval: 5,
     }
   }
 
@@ -45,6 +47,7 @@ export function loadConfig(): Config | null {
       apiToken: envToken ?? parsed.apiToken ?? '',
       workspaceId: envWorkspace ? parseInt(envWorkspace, 10) : (parsed.workspaceId ?? 0),
       reminderEveryNPrompts: parsed.reminderEveryNPrompts ?? 5,
+      roundingInterval: parsed.roundingInterval ?? 5,
       projects: parsed.projects,
     }
   } catch {

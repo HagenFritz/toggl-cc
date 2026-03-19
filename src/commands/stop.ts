@@ -2,7 +2,7 @@ import { loadConfig, type Config } from '../config.js'
 import { getCurrentTimer, stopTimer, type TogglTimeEntry } from '../api/toggl.js'
 import { clearTimer } from '../state.js'
 import { clearCache } from '../cache.js'
-import { formatDuration } from '../utils.js'
+import { formatDuration, roundToInterval } from '../utils.js'
 
 export async function runStop(): Promise<void> {
   const config = loadConfig()
@@ -26,10 +26,12 @@ export async function runStop(): Promise<void> {
   }
   const entry = current as TogglTimeEntry
 
-  const elapsed = formatDuration(new Date(entry.start))
+  // Round the stop time
+  const stopTime = roundToInterval(new Date(), cfg.roundingInterval ?? 5)
+  const elapsed = formatDuration(new Date(entry.start), stopTime)
 
   try {
-    await stopTimer(cfg.apiToken, cfg.workspaceId, entry.id)
+    await stopTimer(cfg.apiToken, cfg.workspaceId, entry.id, stopTime)
   } catch (err) {
     console.log(`Error stopping timer: ${String(err)}`)
     process.exit(0)

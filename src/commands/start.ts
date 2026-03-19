@@ -1,10 +1,10 @@
 import { execSync } from 'child_process'
 import * as readline from 'readline'
 import { loadConfig, type Config } from '../config.js'
-import { getCurrentTimer, startTimer, stopTimer } from '../api/toggl.js'
+import { getCurrentTimer, startTimer, stopTimer, getRecentTimeEntries } from '../api/toggl.js'
 import { setTimer, setPaused } from '../state.js'
 import { saveCache } from '../cache.js'
-import { formatDuration } from '../utils.js'
+import { formatDuration, roundToInterval } from '../utils.js'
 
 function prompt(question: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -110,7 +110,24 @@ export async function runStart(args: string[]): Promise<void> {
   // Pick a project if any are synced
   const projectId = await pickProject(cfg)
 
-  const entry = await startTimer(cfg.apiToken, cfg.workspaceId, description, projectId)
+  // Round the start time
+  let startTime = roundToInterval(new Date(), cfg.roundingInterval ?? 5)
+
+  // Check for overlap with previous entry
+  try {
+    const recentEntries = await getRecentTimeEntries(cfg.apiToken)
+    const lastEntry = recentEntries.find((e) => e.stop)
+    if (lastEntry && lastEntry.stop) {
+      const lastStopTime = new Date(lastEntry.stop)
+      if (startTime <= lastStopTime) {
+        startTime = new Date(lastStopTime.getTime() + 1000) // Move to 1 second after previous entry
+      }
+    }
+  } catch {
+    // If we can't fetch recent entries, proceed with the rounded time
+  }
+
+  const entry = await startTimer(cfg.apiToken, cfg.workspaceId, description, projectId, startTime)
 
   // Starting a timer always clears the paused state
   setPaused(false)

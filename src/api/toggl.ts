@@ -20,6 +20,7 @@ export interface TogglTimeEntry {
   id: number
   description: string
   start: string
+  stop?: string
   duration: number
   workspace_id: number
 }
@@ -85,12 +86,13 @@ export async function startTimer(
   workspaceId: number,
   description: string,
   projectId?: number,
+  startTime?: Date,
 ): Promise<TogglTimeEntry> {
   return request<TogglTimeEntry>('POST', `/workspaces/${workspaceId}/time_entries`, apiToken, {
     description,
     workspace_id: workspaceId,
     project_id: projectId ?? null,
-    start: new Date().toISOString(),
+    start: (startTime ?? new Date()).toISOString(),
     duration: -1,
     created_with: 'toggl-cc',
   })
@@ -100,10 +102,21 @@ export async function stopTimer(
   apiToken: string,
   workspaceId: number,
   timerId: number,
+  stopTime?: Date,
 ): Promise<TogglTimeEntry> {
+  const body = stopTime ? { stop: stopTime.toISOString() } : undefined
   return request<TogglTimeEntry>(
     'PATCH',
     `/workspaces/${workspaceId}/time_entries/${timerId}/stop`,
     apiToken,
+    body,
   )
+}
+
+export async function getRecentTimeEntries(
+  apiToken: string,
+  sinceUnix?: number,
+): Promise<TogglTimeEntry[]> {
+  const since = sinceUnix ?? Math.floor(Date.now() / 1000) - 24 * 3600
+  return request<TogglTimeEntry[]>('GET', `/me/time_entries?since=${since}`, apiToken)
 }

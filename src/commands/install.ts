@@ -27,10 +27,11 @@ export async function runInstall(): Promise<void> {
   const existing = loadConfig()
   let apiToken = ''
   let workspaceId = 0
+  let roundingInterval = existing?.roundingInterval ?? 5
 
   if (existing && existing.apiToken && existing.workspaceId) {
     log.info(
-      `Found existing config: workspace ${existing.workspaceId}, ${existing.reminderEveryNPrompts}s reminder interval`,
+      `Found existing config: workspace ${existing.workspaceId}, ${existing.reminderEveryNPrompts}s reminder interval, ${roundingInterval}m rounding`,
     )
     const shouldUpdate = await confirm({
       message: 'Update API credentials?',
@@ -96,6 +97,20 @@ export async function runInstall(): Promise<void> {
     }
   }
 
+  // Ask for rounding preference
+  const roundingChoice = await select({
+    message: 'How should start/stop times be rounded?',
+    options: [
+      { value: 5, label: 'Nearest 5-minute mark (default)' },
+      { value: 1, label: 'Nearest minute' },
+    ],
+    initialValue: roundingInterval,
+  })
+
+  if (typeof roundingChoice !== 'symbol') {
+    roundingInterval = roundingChoice as number
+  }
+
   // Save credentials
   const shouldSave = await confirm({
     message: 'Save credentials to ~/.toggl-cc/config.json?',
@@ -107,6 +122,7 @@ export async function runInstall(): Promise<void> {
       apiToken,
       workspaceId,
       reminderEveryNPrompts: existing?.reminderEveryNPrompts ?? 5,
+      roundingInterval,
       projects: existing?.projects,
     })
     log.success('Credentials saved to ~/.toggl-cc/config.json')
